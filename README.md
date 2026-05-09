@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ NEON_STRATOS v1.1
 
-## Getting Started
+**The Cyberpunk Yield Intelligence Engine on Solana.**
 
-First, run the development server:
+Neon Stratos is a production-ready DeFi dashboard built for the **Superteam Frontier Hackathon**. It bridges real-time market intelligence from **Birdeye** with advanced yield strategies from **Kamino Finance**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Smart Signal (Birdeye Integration):** Automatically detects 24h volume spikes and price volatility to highlight high-yield opportunities.
+- **Yield Engine (Kamino Integration):** Deep-linked vault management with automated APY and TVL tracking.
+- **Terminal Simulator:** Built-in profit calculator to estimate daily yields per $1,000 before deployment.
+- **Cyberpunk UI:** High-fidelity, neon-glow interface optimized for professional traders.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js (React), Tailwind CSS
+- **Integrations:** Kamino SDK, Birdeye API, Solflare Wallet
+- **Infrastructure:** Eitherway.ai, QuickNode
 
-## Learn More
+## 📦 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+1. Clone the repo
+2. `npm install`
+3. `npm run dev`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Built for the Eitherway Track — May 2026_
