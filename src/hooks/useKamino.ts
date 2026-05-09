@@ -27,6 +27,7 @@ interface KaminoVaultRaw {
 
 export interface KaminoVault {
   address: string;
+  symbol: string; // Ini yang tadi bikin merah
   tokenA: { mint: string; symbol: string; decimals: number };
   tokenB: { mint: string; symbol: string; decimals: number };
   apy: number;
@@ -42,10 +43,11 @@ export interface KaminoVault {
   dex: string;
 }
 
-// Seed mock data – shown when Kamino API is unreachable
+// Seed mock data – ditambahkan properti 'symbol' agar sesuai Interface dan tidak error
 const MOCK_VAULTS: KaminoVault[] = [
   {
     address: "USDC-SOL-0",
+    symbol: "USDC-SOL",
     tokenA: {
       mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       symbol: "USDC",
@@ -70,6 +72,7 @@ const MOCK_VAULTS: KaminoVault[] = [
   },
   {
     address: "SOL-USDT-1",
+    symbol: "SOL-USDT",
     tokenA: {
       mint: "So11111111111111111111111111111111111111112",
       symbol: "SOL",
@@ -94,6 +97,7 @@ const MOCK_VAULTS: KaminoVault[] = [
   },
   {
     address: "JTO-USDC-4",
+    symbol: "JTO-USDC",
     tokenA: {
       mint: "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
       symbol: "JTO",
@@ -155,16 +159,24 @@ async function fetchKaminoStrategies() {
 // --- 2. PERBAIKAN FUNGSI NORMALIZE (RAW TYPE FIXED) ---
 function normalizeKaminoVault(raw: KaminoVaultRaw): KaminoVault {
   const apy = parseFloat(String(raw.apy24h || raw.apy || 0)) * 100;
+
+  // Ambil symbol token atau gunakan fallback
+  const symbolA = raw.tokenASymbol || "TOKEN_A";
+  const symbolB = raw.tokenBSymbol || "TOKEN_B";
+
   return {
     address: raw.address,
+    // TAMBAHKAN INI: Gabungkan symbol agar sesuai dengan Interface KaminoVault
+    symbol: `${symbolA}-${symbolB}`,
+
     tokenA: {
       mint: raw.tokenAMint,
-      symbol: raw.tokenASymbol || "TOKEN_A",
+      symbol: symbolA,
       decimals: raw.tokenADecimals || 6,
     },
     tokenB: {
       mint: raw.tokenBMint,
-      symbol: raw.tokenBSymbol || "TOKEN_B",
+      symbol: symbolB,
       decimals: raw.tokenBDecimals || 6,
     },
     apy: apy,

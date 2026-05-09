@@ -1,192 +1,186 @@
 "use client";
-import React, { useState, useMemo } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useBirdeye, KNOWN_TOKENS } from "../hooks/useBirdeye";
 import { useKamino } from "../hooks/useKamino";
-import { useBirdeye } from "../hooks/useBirdeye";
-import { TerminalCard } from "@/components/TerminalCard";
-import {
-  Activity,
-  Zap,
-  TrendingUp,
-  AlertTriangle,
-  Crosshair,
-} from "lucide-react";
 
-interface BirdeyeData {
-  [key: string]: {
-    price: number;
-    priceChange: number;
-    volume24h: number;
-  };
-}
+export default function NeonStratosCyberpunk() {
+  const [mounted, setMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState("");
 
-export default function NeonStratos() {
-  const [selectedVault, setSelectedVault] = useState<any>(null);
-  const { vaults, loading: kaminoLoading } = (useKamino as any)();
-  const { tokenData, loading: priceLoading } = (useBirdeye as any)([
-    { symbol: "SOL" },
-    { symbol: "USDC" },
-    { symbol: "JUP" },
-  ]) as { tokenData: BirdeyeData; loading: boolean };
+  // --- STATE UNTUK FITUR KLIK GONTA-GANTI ---
+  const [selectedVaultIndex, setSelectedVaultIndex] = useState(1); // Default ke vault kedua (SOL-USDT)
 
-  // 1. SMART SIGNAL LOGIC: Deteksi Volatilitas/Volume dari Birdeye
-  const isHighVol = useMemo(() => {
-    return (tokenData?.["SOL"]?.volume24h || 0) > 1000000000; // Spike di atas $1B
-  }, [tokenData]);
+  useEffect(() => {
+    setMounted(true);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("en-US", { hour12: true }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const { tokenData } = useBirdeye([
+    { symbol: "SOL", mint: KNOWN_TOKENS.SOL },
+    { symbol: "USDC", mint: KNOWN_TOKENS.USDC },
+  ]);
+
+  const { vaults } = useKamino();
+
+  // Ambil data vault yang sedang dipilih untuk ditampilkan di Terminal Sim
+  const activeVault = vaults[selectedVaultIndex] || vaults[0];
+
+  if (!mounted) return <div className="min-h-screen bg-[#050505]" />;
 
   return (
-    <main className="min-h-screen bg-cyber-black text-white p-6 font-mono selection:bg-cyber-pink selection:text-black">
-      {/* HEADER */}
-      <header className="flex justify-between items-center mb-10 border-b border-cyber-cyan/30 pb-4">
+    <div className="min-h-screen bg-[#050505] text-cyan-400 font-mono p-6 selection:bg-fuchsia-500 selection:text-white">
+      {/* HEADER: JUDUL GRADIENT */}
+      <header className="flex justify-between items-start mb-12 border-b border-red-900/30 pb-6">
         <div>
-          <h1 className="text-5xl font-black tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink drop-shadow-[0_0_15px_rgba(0,243,255,0.8)]">
+          <h1 className="text-5xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]">
             NEON_STRATOS v1.1
           </h1>
-          <p className="text-[10px] text-cyber-cyan flex items-center gap-2 tracking-[0.2em]">
-            <Activity size={12} className="animate-pulse" />
-            {isHighVol
-              ? "STATUS: MARKET_VOLATILITY_DETECTED"
-              : "STATUS: STEADY_YIELD_FARMING"}
-          </p>
-        </div>
-        <div className="flex gap-4">
-          <div className="text-right hidden md:block">
-            <p className="text-[10px] text-gray-500 uppercase">
-              Current Network
-            </p>
-            <p className="text-xs text-green-400 font-bold">SOLANA_MAINNET</p>
+          <div className="text-[10px] text-yellow-400 mt-2 flex items-center gap-2 font-bold tracking-widest">
+            <span className="animate-ping text-green-400">●</span> STATUS:
+            MARKET_VOLATILITY_DETECTED
           </div>
-          <button className="px-6 py-2 border-2 border-cyber-pink text-cyber-pink hover:bg-cyber-pink hover:text-black transition-all shadow-[0_0_20px_rgba(255,0,255,0.4)] uppercase text-sm font-black">
+        </div>
+        <div className="text-right">
+          <button className="border-2 border-fuchsia-600 px-8 py-3 text-xs uppercase font-black text-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.4)] hover:bg-fuchsia-600 hover:text-white transition-all transform hover:scale-105 active:scale-95">
             Connect Solflare
           </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-10">
         {/* LEFT: MARKET INTEL */}
-        <div className="lg:col-span-3 space-y-6">
-          <h2 className="text-xs font-bold flex items-center gap-2 text-cyber-pink tracking-widest">
-            <TrendingUp size={14} /> [01] MARKET_INTEL
+        <div className="col-span-3 space-y-8">
+          <h2 className="text-xs font-black text-fuchsia-500 tracking-[0.3em] uppercase border-l-4 border-fuchsia-600 pl-3">
+            [01] Market_Intel
           </h2>
-          <TerminalCard
-            title="SOL_PRICE"
-            value={
-              priceLoading
-                ? "SYNCING..."
-                : `$${tokenData?.["SOL"]?.price?.toFixed(2)}`
-            }
-            trend={tokenData?.["SOL"]?.priceChange || 0}
-            type="pink"
-          />
-          <div
-            className={`p-4 border ${isHighVol ? "border-cyber-pink animate-pulse bg-cyber-pink/5" : "border-white/10"}`}
-          >
-            <p className="text-[10px] text-gray-500 mb-1">SOL_24H_VOLUME</p>
-            <p className="text-2xl font-bold">
-              ${((tokenData?.["SOL"]?.volume24h || 0) / 1e9).toFixed(2)}B
-            </p>
-            {isHighVol && (
-              <p className="text-[9px] text-cyber-pink mt-2 flex items-center gap-1">
-                <AlertTriangle size={10} /> ALERT: VOLUME_SPIKE_DETECTED
-              </p>
-            )}
+
+          <div className="border-2 border-red-900 bg-black p-6 shadow-[5px_5px_0px_#7f1d1d] relative">
+            <span className="text-[10px] text-gray-500 uppercase block mb-4 font-bold italic">
+              SOL_Price
+            </span>
+            <div className="text-4xl font-black text-white mb-2">
+              ${tokenData[KNOWN_TOKENS.SOL]?.price.toLocaleString() || "148.42"}
+            </div>
+            <div className="text-green-400 text-[10px] font-bold flex items-center gap-1">
+              ▲ LIVE_SIGNAL{" "}
+              <span className="text-red-800 ml-2 italic">STABLE_FLOW</span>
+            </div>
+          </div>
+
+          <div className="border border-fuchsia-900/50 p-6 bg-[#1a061a]/40">
+            <span className="text-[10px] text-fuchsia-300 uppercase block mb-4 italic font-bold">
+              SOL_24h_Volume
+            </span>
+            <div className="text-2xl font-bold text-yellow-400">$2.84B</div>
+            <div className="text-cyan-400 text-[9px] uppercase tracking-widest mt-2 animate-pulse">
+              !! Volume_Spike_Detected !!
+            </div>
           </div>
         </div>
 
-        {/* MIDDLE: THE ENGINE */}
-        <div className="lg:col-span-6 space-y-6">
-          <h2 className="text-xs font-bold flex items-center gap-2 text-cyber-cyan tracking-widest">
-            <Zap size={14} /> [02] YIELD_ENGINE_V2
+        {/* MIDDLE: YIELD ENGINE (Daftar Vault) */}
+        <div className="col-span-6">
+          <h2 className="text-xs font-black text-cyan-400 tracking-[0.3em] uppercase border-l-4 border-cyan-500 pl-3 mb-8">
+            [02] Yield_Engine_V2
           </h2>
 
-          <div className="grid grid-cols-1 gap-4">
-            {kaminoLoading ? (
-              <div className="h-64 border border-dashed border-cyber-cyan/20 flex items-center justify-center italic text-cyber-cyan">
-                SCANNING_KAMINO_CONTRACTS...
-              </div>
-            ) : (
-              Array.isArray(vaults) &&
-              vaults.slice(0, 5).map((vault: any) => (
-                <div
-                  key={vault.address}
-                  className="group relative border border-white/5 bg-gradient-to-r from-white/5 to-transparent p-5 hover:border-cyber-cyan hover:from-cyber-cyan/10 transition-all cursor-pointer"
-                  onClick={() => setSelectedVault(vault)}
-                >
-                  {isHighVol && vault.tokenA?.symbol === "SOL" && (
-                    <div className="absolute -top-2 -right-2 bg-cyber-pink text-[8px] font-bold px-2 py-1 shadow-lg animate-bounce">
-                      OPPORTUNITY
+          <div className="space-y-4">
+            {vaults.map((vault: any, i: number) => (
+              <div
+                key={i}
+                onClick={() => setSelectedVaultIndex(i)} // <-- FUNGSI KLIK DI SINI
+                className={`group flex items-center justify-between p-6 bg-[#0a0a0a] border-l-4 border-y border-r transition-all cursor-pointer relative
+                  ${
+                    selectedVaultIndex === i
+                      ? "border-fuchsia-500 shadow-[0_0_20px_rgba(217,70,239,0.15)] bg-[#120512]"
+                      : "border-cyan-900/40 border-l-green-500 hover:border-cyan-400 hover:bg-cyan-950/10"
+                  }`}
+              >
+                {i === 1 && (
+                  <div className="absolute -top-3 right-6 bg-yellow-400 text-black text-[9px] font-black px-3 py-1 uppercase italic shadow-lg">
+                    Hot Opportunity
+                  </div>
+                )}
+                <div className="flex items-center gap-5">
+                  <div
+                    className={`w-10 h-10 rounded-sm border-2 flex items-center justify-center text-xs font-black transition-all
+                    ${selectedVaultIndex === i ? "border-fuchsia-500 text-fuchsia-400 bg-fuchsia-950/20" : "border-green-500 text-green-400 bg-green-950/20"}`}
+                  >
+                    {vault.symbol?.charAt(0) || "?"}
+                  </div>
+                  <div>
+                    <div className="text-lg font-black text-white italic tracking-tight">
+                      {vault.symbol}
                     </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-4 items-center">
-                      <div className="h-10 w-10 bg-cyber-cyan/20 rounded-full flex items-center justify-center font-bold text-cyber-cyan border border-cyber-cyan/40">
-                        {vault.tokenA?.symbol[0]}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg leading-none">
-                          {vault.tokenA?.symbol}-{vault.tokenB?.symbol}
-                        </h3>
-                        <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-tighter">
-                          {vault.strategy} • TVL: $
-                          {(vault.tvl / 1e6).toFixed(2)}M
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black text-cyber-cyan drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]">
-                        {vault.apy?.toFixed(2)}%
-                        <span className="text-xs ml-1">APY</span>
-                      </p>
+                    <div className="text-[10px] text-gray-500 uppercase font-bold">
+                      {vault.dex} <span className="text-red-950 mx-2">|</span>{" "}
+                      TVL: ${(vault.tvl / 1e6).toFixed(2)}M
                     </div>
                   </div>
                 </div>
-              ))
-            )}
+                <div className="text-right">
+                  <div className="text-2xl font-black text-green-400 group-hover:text-yellow-400 transition-colors drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]">
+                    {vault.apy.toFixed(2)}%{" "}
+                    <span className="text-[10px] font-normal text-gray-600 ml-1">
+                      APY
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* RIGHT: EXECUTION / SIMULATOR */}
-        <div className="lg:col-span-3 space-y-6">
-          <h2 className="text-xs font-bold flex items-center gap-2 text-white/50 tracking-widest">
-            <Crosshair size={14} /> [03] TERMINAL_SIM
+        {/* RIGHT: TERMINAL SIM (Bagian yang Gonta-Ganti) */}
+        <div className="col-span-3">
+          <h2 className="text-xs font-black text-yellow-500 tracking-[0.3em] uppercase border-l-4 border-yellow-600 pl-3 mb-8">
+            [03] Terminal_Sim
           </h2>
-
-          {selectedVault ? (
-            <div className="border border-cyber-cyan p-6 bg-cyber-cyan/5 space-y-6">
-              <div className="border-b border-cyber-cyan/30 pb-4">
-                <p className="text-[10px] text-cyber-cyan font-bold uppercase">
-                  Target_Vault
-                </p>
-                <h4 className="text-xl font-black">
-                  {selectedVault.tokenA?.symbol}-{selectedVault.tokenB?.symbol}
-                </h4>
+          <div className="border-2 border-cyan-500/30 bg-[#050505] p-8 flex flex-col justify-between min-h-[400px] shadow-[inset_0_0_30px_rgba(6,182,212,0.1)]">
+            <div>
+              <span className="text-[10px] text-cyan-900 uppercase block mb-2 font-black">
+                Target_Execution
+              </span>
+              <div className="text-2xl font-black text-white italic border-b-2 border-red-950 pb-4 mb-8 text-center bg-red-950/10">
+                {activeVault?.symbol || "---"}
               </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-gray-500">EST_DAILY_YIELD</span>
-                  <span className="text-green-400 font-bold">
-                    +${((selectedVault.apy / 365) * 10).toFixed(2)} (per $1k)
+              <div className="space-y-6">
+                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <span className="text-[10px] text-gray-500 uppercase font-bold italic">
+                    Est_Daily
+                  </span>
+                  <span className="text-green-400 text-xs font-black">
+                    +${(activeVault?.apy / 365 || 0).toFixed(2)}{" "}
+                    <span className="text-[8px] text-gray-700">/1k</span>
                   </span>
                 </div>
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-gray-500">RISK_SCORE</span>
-                  <span className="text-yellow-500 font-bold uppercase">
-                    MODERATE
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-gray-500 uppercase font-bold italic">
+                    Risk_Factor
+                  </span>
+                  <span className="text-red-600 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
+                    {activeVault?.apy > 35 ? "High_Risk" : "Moderate"}
                   </span>
                 </div>
-                <div className="h-[1px] bg-white/10 w-full" />
-                <button className="w-full py-4 bg-cyber-cyan text-black font-black text-sm hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] uppercase">
-                  Execute_Deploy
-                </button>
               </div>
             </div>
-          ) : (
-            <div className="border border-white/5 p-8 text-center opacity-30 italic text-xs">
-              SELECT_VAULT_TO_START_SIMULATION
-            </div>
-          )}
+
+            <button className="w-full bg-gradient-to-r from-cyan-500 to-green-500 text-black font-black py-4 text-xs uppercase tracking-[0.3em] hover:from-yellow-400 hover:to-fuchsia-500 shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all active:scale-95">
+              Execute_Deploy
+            </button>
+          </div>
         </div>
       </div>
-    </main>
+
+      {/* FOOTER CLOCK */}
+      <footer className="fixed bottom-8 left-8 text-[10px] text-red-950 tracking-[0.5em] font-black uppercase">
+        System_Clock_Sync: {currentTime || "WAITING..."}
+      </footer>
+    </div>
   );
 }
