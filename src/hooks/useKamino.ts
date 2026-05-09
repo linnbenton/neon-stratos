@@ -1,8 +1,49 @@
 import { useState, useEffect, useCallback } from "react";
 import { PROXY_API, KAMINO_API } from "../config";
 
+// --- 1. DEFINISI TYPES (PENTING UNTUK BUILD) ---
+interface KaminoVaultRaw {
+  address: string;
+  tokenAMint: string;
+  tokenASymbol?: string;
+  tokenADecimals?: number;
+  tokenBMint: string;
+  tokenBSymbol?: string;
+  tokenBDecimals?: number;
+  apy24h?: string | number;
+  apy?: string | number;
+  tvl?: string | number;
+  volume24h?: string | number;
+  feesApy24h?: string | number;
+  rewardsApy?: string | number;
+  strategyType?: string;
+  price?: string | number;
+  priceLower?: string | number;
+  priceUpper?: string | number;
+  utilizationRate?: string | number;
+  status?: string;
+  dex?: string;
+}
+
+export interface KaminoVault {
+  address: string;
+  tokenA: { mint: string; symbol: string; decimals: number };
+  tokenB: { mint: string; symbol: string; decimals: number };
+  apy: number;
+  tvl: number;
+  volume24h: number;
+  feesApy: number;
+  rewardsApy: number;
+  strategy: string;
+  price: number;
+  priceRange: [number, number];
+  utilizationRate: number;
+  status: string;
+  dex: string;
+}
+
 // Seed mock data – shown when Kamino API is unreachable
-const MOCK_VAULTS = [
+const MOCK_VAULTS: KaminoVault[] = [
   {
     address: "USDC-SOL-0",
     tokenA: {
@@ -52,54 +93,6 @@ const MOCK_VAULTS = [
     dex: "Raydium",
   },
   {
-    address: "BTC-SOL-2",
-    tokenA: {
-      mint: "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-      symbol: "BTC",
-      decimals: 6,
-    },
-    tokenB: {
-      mint: "So11111111111111111111111111111111111111112",
-      symbol: "SOL",
-      decimals: 9,
-    },
-    apy: 18.44,
-    tvl: 8_330_000,
-    volume24h: 1_980_000,
-    feesApy: 9.2,
-    rewardsApy: 9.24,
-    strategy: "Balanced",
-    price: 63_420.1,
-    priceRange: [58_000, 70_000],
-    utilizationRate: 65.3,
-    status: "ACTIVE",
-    dex: "Orca",
-  },
-  {
-    address: "MSOL-SOL-3",
-    tokenA: {
-      mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
-      symbol: "mSOL",
-      decimals: 9,
-    },
-    tokenB: {
-      mint: "So11111111111111111111111111111111111111112",
-      symbol: "SOL",
-      decimals: 9,
-    },
-    apy: 8.91,
-    tvl: 22_100_000,
-    volume24h: 890_000,
-    feesApy: 2.3,
-    rewardsApy: 6.61,
-    strategy: "Correlated",
-    price: 1.0628,
-    priceRange: [1.04, 1.09],
-    utilizationRate: 94.7,
-    status: "ACTIVE",
-    dex: "Meteora",
-  },
-  {
     address: "JTO-USDC-4",
     tokenA: {
       mint: "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
@@ -122,30 +115,6 @@ const MOCK_VAULTS = [
     utilizationRate: 78.9,
     status: "ACTIVE",
     dex: "Raydium",
-  },
-  {
-    address: "WIF-USDC-5",
-    tokenA: {
-      mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
-      symbol: "WIF",
-      decimals: 6,
-    },
-    tokenB: {
-      mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      symbol: "USDC",
-      decimals: 6,
-    },
-    apy: 67.33,
-    tvl: 3_440_000,
-    volume24h: 8_220_000,
-    feesApy: 52.1,
-    rewardsApy: 15.23,
-    strategy: "Aggressive",
-    price: 2.18,
-    priceRange: [1.7, 2.7],
-    utilizationRate: 61.2,
-    status: "ACTIVE",
-    dex: "Orca",
   },
 ];
 
@@ -172,28 +141,6 @@ const MOCK_POSITIONS = [
     deposited: 4_948.4,
     earned: -128.4,
   },
-  {
-    vault: "JTO-USDC-4",
-    tokenA: "JTO",
-    tokenB: "USDC",
-    valueUSD: 2_110,
-    pnl: 418.7,
-    pnlPct: 24.76,
-    shares: 0.0000501,
-    deposited: 1_691.3,
-    earned: 418.7,
-  },
-  {
-    vault: "WIF-USDC-5",
-    tokenA: "WIF",
-    tokenB: "USDC",
-    valueUSD: 940,
-    pnl: 220.6,
-    pnlPct: 30.66,
-    shares: 0.0000273,
-    deposited: 719.4,
-    earned: 220.6,
-  },
 ];
 
 async function fetchKaminoStrategies() {
@@ -205,8 +152,9 @@ async function fetchKaminoStrategies() {
   return res.json();
 }
 
-function normalizeKaminoVault(raw) {
-  const apy = parseFloat(raw.apy24h || raw.apy || 0) * 100;
+// --- 2. PERBAIKAN FUNGSI NORMALIZE (RAW TYPE FIXED) ---
+function normalizeKaminoVault(raw: KaminoVaultRaw): KaminoVault {
+  const apy = parseFloat(String(raw.apy24h || raw.apy || 0)) * 100;
   return {
     address: raw.address,
     tokenA: {
@@ -220,29 +168,29 @@ function normalizeKaminoVault(raw) {
       decimals: raw.tokenBDecimals || 6,
     },
     apy: apy,
-    tvl: parseFloat(raw.tvl || 0),
-    volume24h: parseFloat(raw.volume24h || 0),
-    feesApy: parseFloat(raw.feesApy24h || 0) * 100,
-    rewardsApy: parseFloat(raw.rewardsApy || 0) * 100,
+    tvl: parseFloat(String(raw.tvl || 0)),
+    volume24h: parseFloat(String(raw.volume24h || 0)),
+    feesApy: parseFloat(String(raw.feesApy24h || 0)) * 100,
+    rewardsApy: parseFloat(String(raw.rewardsApy || 0)) * 100,
     strategy: raw.strategyType || "Standard",
-    price: parseFloat(raw.price || 0),
+    price: parseFloat(String(raw.price || 0)),
     priceRange: [
-      parseFloat(raw.priceLower || 0),
-      parseFloat(raw.priceUpper || 0),
+      parseFloat(String(raw.priceLower || 0)),
+      parseFloat(String(raw.priceUpper || 0)),
     ],
-    utilizationRate: parseFloat(raw.utilizationRate || 0) * 100,
+    utilizationRate: parseFloat(String(raw.utilizationRate || 0)) * 100,
     status: raw.status || "ACTIVE",
     dex: raw.dex || "Unknown",
   };
 }
 
 export function useKamino() {
-  const [vaults, setVaults] = useState([]);
-  const [positions, setPositions] = useState([]);
+  const [vaults, setVaults] = useState<KaminoVault[]>([]);
+  const [positions, setPositions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -251,12 +199,13 @@ export function useKamino() {
       const data = await fetchKaminoStrategies();
       const top = (Array.isArray(data) ? data : data.strategies || [])
         .slice(0, 12)
-        .map(normalizeKaminoVault)
-        .filter((v) => v.apy > 0);
+        .map((v: any) => normalizeKaminoVault(v as KaminoVaultRaw))
+        .filter((v: KaminoVault) => v.apy > 0);
+
       if (top.length === 0) throw new Error("No vault data returned");
       setVaults(top);
       setIsMock(false);
-    } catch (err) {
+    } catch (err: any) {
       setVaults(MOCK_VAULTS);
       setIsMock(true);
       setError(
