@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# build outputs
+dist/
+stats.html
+neon-stratos/
+neon-stratos_BACKUP/
+node_modules/
+
+# next (kalau tidak dipakai)
+.next
