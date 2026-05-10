@@ -49,16 +49,39 @@ export default function ActivityFeed() {
 
         <div
           className="
-            text-[10px]
-            tracking-widest
-            text-[#00ffa3]
-            border border-[#00ffa3]/20
-            bg-[#00ffa3]/10
-            px-3 py-1
-            rounded-full
-          "
+    flex items-center gap-2
+
+    text-[10px]
+    tracking-[0.18em]
+
+    text-[#00ffa3]
+
+    border border-[#00ffa3]/20
+    bg-[#00ffa3]/10
+
+    px-3 py-1.5
+    rounded-full
+  "
         >
-          LIVE STREAM
+          <div className="relative flex h-2 w-2">
+            <span
+              className="
+        animate-ping
+        absolute inline-flex h-full w-full rounded-full
+        bg-[#00ffa3]
+        opacity-75
+      "
+            />
+
+            <span
+              className="
+        relative inline-flex rounded-full
+        h-2 w-2
+        bg-[#00ffa3]
+      "
+            />
+          </div>
+          LIVE
         </div>
       </div>
 
