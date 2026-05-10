@@ -1,28 +1,66 @@
-# ⚡ NEON_STRATOS v1.1
+# ⚡ Neon Stratos
 
-**The Cyberpunk Yield Intelligence Engine on Solana.**
+AI-powered Solana DeFi command terminal.
 
-Neon Stratos is a production-ready DeFi dashboard built for the **Superteam Frontier Hackathon**. It bridges real-time market intelligence from **Birdeye** with advanced yield strategies from **Kamino Finance**.
-
-## 🚀 Key Features
-
-- **Smart Signal (Birdeye Integration):** Automatically detects 24h volume spikes and price volatility to highlight high-yield opportunities.
-- **Yield Engine (Kamino Integration):** Deep-linked vault management with automated APY and TVL tracking.
-- **Terminal Simulator:** Built-in profit calculator to estimate daily yields per $1,000 before deployment.
-- **Cyberpunk UI:** High-fidelity, neon-glow interface optimized for professional traders.
-
-## 🛠️ Tech Stack
-
-- **Framework:** Next.js (React), Tailwind CSS
-- **Integrations:** Kamino SDK, Birdeye API, Solflare Wallet
-- **Infrastructure:** Eitherway.ai, QuickNode
-
-## 📦 Getting Started
-
-1. Clone the repo
-2. `npm install`
-3. `npm run dev`
+Neon Stratos is a high-performance DeFi dashboard built for the Superteam Frontier Hackathon. It combines real-time market visualization, intelligent swap routing simulation, and advanced yield monitoring into a unified trading terminal experience for Solana users.
 
 ---
 
-_Built for the Eitherway Track — May 2026_
+## 🚀 Features
+
+- Live market dashboard
+- Instant swap engine
+- Real-time activity feed
+- Portfolio monitoring
+- Cyberpunk trading UI
+
+---
+
+## 🛠️ Tech Stack
+
+- React
+- Vite
+- Tailwind CSS
+- Recharts
+- Framer Motion
+
+---
+
+## 🔌 Planned Integrations
+
+- Jupiter API
+- Birdeye API
+- Kamino Finance
+- Solflare Wallet
+- QuickNode RPC
+
+---
+
+## 🧪 Current Status
+
+Neon Stratos is currently in active hackathon development with:
+
+- Production-ready UI architecture
+- Stable deployment pipeline
+- Modular swap engine foundation
+- Real-time dashboard infrastructure
+
+Upcoming upgrades include:
+
+- Real Jupiter routing
+- Wallet integration
+- Live on-chain execution
+- Advanced DeFi automation
+
+---
+
+## 📦 Local Development
+
+```bash
+npm install
+npm run dev
+
+
+```
+
+Built for the Superteam Frontier Hackathon — May 2026
