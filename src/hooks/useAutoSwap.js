@@ -1,50 +1,66 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const PRICES = {
+  SOL: 148,
+  USDC: 1,
+  JUP: 0.92,
+  BONK: 0.000032,
+};
 
 export function useAutoSwap(tokenIn, tokenOut, amount) {
   const [route, setRoute] = useState(null);
   const [loading, setLoading] = useState(false);
   const [valid, setValid] = useState(false);
 
-  const fetchRoute = useCallback(() => {
-    const num = Number(amount);
-
-    if (!num || num <= 0) {
+  useEffect(() => {
+    if (!amount || Number(amount) <= 0) {
       setRoute(null);
       setValid(false);
       return;
     }
 
-    setLoading(true);
+    const fetchQuote = async () => {
+      try {
+        setLoading(true);
 
-    setTimeout(() => {
-      // 🔥 MOCK PRICE ENGINE (AMAN UNTUK COMMIT)
-      const fakePrice = 142;
+        const inputPrice = PRICES[tokenIn];
+        const outputPrice = PRICES[tokenOut];
 
-      const out = num * fakePrice;
+        if (!inputPrice || !outputPrice) {
+          setValid(false);
+          return;
+        }
 
-      setRoute({
-        outAmount: out.toFixed(4),
-        pricePerUnit: fakePrice,
-      });
+        // simulate API latency
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-      setValid(true);
-      setLoading(false);
-    }, 150);
+        const usdValue = Number(amount) * inputPrice;
+
+        const outAmount = usdValue / outputPrice;
+
+        setRoute({
+          outAmount: outAmount.toFixed(2),
+          pricePerUnit: inputPrice,
+        });
+
+        setValid(true);
+      } catch (err) {
+        console.error(err);
+        setValid(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchQuote, 250);
+
+    return () => clearTimeout(timer);
   }, [tokenIn, tokenOut, amount]);
 
-  useEffect(() => {
-    const num = Number(amount);
-
-    if (!tokenIn || !tokenOut || !num) {
-      setRoute(null);
-      setValid(false);
-      return;
-    }
-
-    const delay = setTimeout(fetchRoute, 150);
-
-    return () => clearTimeout(delay);
-  }, [tokenIn, tokenOut, amount, fetchRoute]);
-
-  return { route, loading, valid };
+  return {
+    route,
+    loading,
+    valid,
+  };
 }

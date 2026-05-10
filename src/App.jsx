@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import MainLayout from "./layout/MainLayout";
 import MarketTable from "./modules/markets/MarketTable";
-import PriceChart from "./modules/charts/PriceChart";
 import TickerBar from "./modules/markets/TickerBar";
 import StatsCard from "./components/ui/StatsCard";
 import WalletPanel from "./modules/wallet/WalletPanel";
-import SwapPanel from "./modules/trading/SwapPanel";
-import ActivityFeed from "./modules/activity/ActivityFeed";
+
+const PriceChart = lazy(() => import("./modules/charts/PriceChart"));
+const SwapPanel = lazy(() => import("./modules/trading/SwapPanel"));
+const ActivityFeed = lazy(() => import("./modules/activity/ActivityFeed"));
 
 export default function App() {
   const [search, setSearch] = useState("");
@@ -105,7 +106,13 @@ export default function App() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
-            <PriceChart />
+            <Suspense
+              fallback={
+                <div className="text-slate-500 text-sm">Loading chart...</div>
+              }
+            >
+              <PriceChart />
+            </Suspense>{" "}
           </div>
 
           <WalletPanel />
@@ -117,11 +124,25 @@ export default function App() {
             <MarketTable tokens={filteredTokens} />
           </div>
 
-          <SwapPanel />
+          <Suspense
+            fallback={
+              <div className="text-slate-500 text-sm">Loading module...</div>
+            }
+          >
+            <SwapPanel />
+          </Suspense>
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
-            <ActivityFeed />
+            <Suspense
+              fallback={
+                <div className="text-slate-500 text-sm">
+                  Loading activity...
+                </div>
+              }
+            >
+              <ActivityFeed />
+            </Suspense>{" "}
           </div>
         </div>
       </div>

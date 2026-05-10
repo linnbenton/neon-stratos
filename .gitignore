@@ -46,6 +46,7 @@ stats.html
 neon-stratos/
 neon-stratos_BACKUP/
 node_modules/
+_next_backup
 
 # next (kalau tidak dipakai)
 .next
