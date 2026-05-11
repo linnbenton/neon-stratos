@@ -1,4 +1,6 @@
-const activities = [
+import { useEffect, useState } from "react";
+
+const initialActivities = [
   {
     type: "SWAP",
     token: "SOL → JUP",
@@ -26,6 +28,47 @@ const activities = [
 ];
 
 export default function ActivityFeed() {
+  const [activities, setActivities] = useState(initialActivities);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const mockActivities = [
+        {
+          type: "SWAP",
+          token: "SOL → USDC",
+          value: "$2,184",
+        },
+        {
+          type: "LP",
+          token: "BONK / SOL",
+          value: "$8,920",
+        },
+        {
+          type: "STAKE",
+          token: "JTO Pool",
+          value: "$4,120",
+        },
+        {
+          type: "VAULT",
+          token: "mSOL Strategy",
+          value: "+14.2%",
+        },
+      ];
+
+      const random =
+        mockActivities[Math.floor(Math.random() * mockActivities.length)];
+
+      const newActivity = {
+        ...random,
+        time: "just now",
+      };
+
+      setActivities((prev) => [newActivity, ...prev.slice(0, 3)]);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
       className="
@@ -59,6 +102,8 @@ export default function ActivityFeed() {
     border border-[#00ffa3]/20
     bg-[#00ffa3]/10
 
+    shadow-[0_0_20px_rgba(0,255,163,0.15)]
+
     px-3 py-1.5
     rounded-full
   "
@@ -90,19 +135,26 @@ export default function ActivityFeed() {
         {activities.map((item, index) => (
           <div
             key={index}
-            className="
-              flex items-center justify-between
+            className={`
+  flex items-center justify-between
 
-              bg-[#05060a]
-              border border-[#1a2332]
-              rounded-xl
+  bg-[#05060a]
+  border border-[#1a2332]
+  rounded-xl
 
-              px-4 py-3
+  px-4 py-3
 
-              hover:border-[#00ffa3]/30
-              hover:bg-[#0b0f17]
-              transition
-            "
+  transition-all duration-500
+
+  hover:border-[#00ffa3]/30
+  hover:bg-[#0b0f17]
+
+  ${
+    index === 0
+      ? "shadow-[0_0_30px_rgba(0,255,163,0.12)] border-[#00ffa3]/20"
+      : ""
+  }
+`}
           >
             {/* Left */}
             <div className="flex flex-col gap-1">

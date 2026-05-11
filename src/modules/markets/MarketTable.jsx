@@ -62,21 +62,44 @@ export default function MarketTable({ tokens = [] }) {
                   </td>
 
                   {/* Price */}
-                  <td className="px-5 py-4 text-right text-slate-200 font-medium">
-                    ${token.price?.toLocaleString()}
+                  <td className="px-5 py-4 text-right">
+                    <div
+                      className="
+                        text-slate-200
+                        font-medium
+
+                        transition-all duration-300
+
+                        hover:text-[#00ffa3]
+                      "
+                    >
+                      ${token.price?.toLocaleString()}
+                    </div>
                   </td>
 
                   {/* Change */}
-                  <td
-                    className={`px-5 py-4 text-right font-medium ${
-                      positive ? "text-[#00ffa3]" : "text-red-400"
-                    }`}
-                  >
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="px-5 py-4 text-right">
+                    <div
+                      className={`
+                        flex items-center justify-end gap-1
+
+                        font-semibold
+
+                        transition-all duration-300
+
+                        ${positive ? "text-[#00ffa3]" : "text-red-400"}
+                     `}
+                    >
                       {positive ? (
-                        <TrendingUp size={14} />
+                        <TrendingUp
+                          size={14}
+                          className="drop-shadow-[0_0_6px_rgba(0,255,163,0.5)]"
+                        />
                       ) : (
-                        <TrendingDown size={14} />
+                        <TrendingDown
+                          size={14}
+                          className="drop-shadow-[0_0_6px_rgba(255,80,80,0.4)]"
+                        />
                       )}
                       {positive ? "+" : ""}
                       {token.change24h?.toFixed(2)}%

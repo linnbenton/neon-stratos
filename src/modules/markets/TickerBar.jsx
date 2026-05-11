@@ -23,7 +23,15 @@ export default function TickerBar({ tokens = [] }) {
             >
               <span className="text-white text-sm">{token.symbol}</span>
 
-              <span className="text-[#00ffa3] font-medium text-sm">
+              <span
+                className="
+    text-[#00ffa3]
+    font-medium
+    text-sm
+
+    drop-shadow-[0_0_8px_rgba(0,255,163,0.45)]
+  "
+              >
                 ${token.price}
               </span>
             </div>

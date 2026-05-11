@@ -1,68 +1,111 @@
-import express from 'express'
+import express from "express";
+import type { Request, Response, NextFunction } from "express";
+import cors from "cors";
 
-const app  = express()
-const PORT = process.env.PORT || 3001
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-const BIRDEYE_KEY = process.env.BIRDEYE_API_KEY || ''
-const BASE_URL    = 'https://public-api.birdeye.so'
+// Menggunakan URL utama yang lebih stabil
+const JUPITER_QUOTE_API = "https://lite-api.jup.ag/quote/v1/quote";
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Content-Type')
-  next()
-})
+// ===============================
+// MIDDLEWARES
+// ===============================
+app.use(cors());
+app.use(express.json());
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, ts: Date.now() })
-})
+// ===============================
+// ROUTES
+// ===============================
 
-// Birdeye token overview
-app.get('/api/birdeye/token', async (req, res) => {
-  const { mint } = req.query as { mint?: string }
-  if (!mint) return res.status(400).json({ error: 'Missing mint' })
-  try {
-    const url = `${BASE_URL}/defi/token_overview?address=${mint}`
-    const r = await fetch(url, {
-      headers: {
-        'X-API-KEY': BIRDEYE_KEY,
-        'x-chain': 'solana',
-      },
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!r.ok) throw new Error(`Birdeye ${r.status}`)
-    const json = await r.json()
-    res.json(json)
-  } catch (err: any) {
-    res.status(502).json({ error: err.message })
+// Health Check
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.json({
+    ok: true,
+    status: "active",
+    server_time: new Date().toISOString(),
+  });
+});
+
+// Jupiter Quote Proxy
+app.get("/api/jupiter/quote", async (req: Request, res: Response) => {
+  const { inputMint, outputMint, amount, slippageBps = "50" } = req.query;
+
+  // 1. Validasi Parameter
+  if (!inputMint || !outputMint || !amount) {
+    return res.status(400).json({
+      error: "Missing parameters",
+      required: ["inputMint", "outputMint", "amount"],
+    });
   }
-})
 
-// Birdeye OHLCV history
-app.get('/api/birdeye/history', async (req, res) => {
-  const { mint, type = '1H' } = req.query as { mint?: string; type?: string }
-  if (!mint) return res.status(400).json({ error: 'Missing mint' })
   try {
-    const now   = Math.floor(Date.now() / 1000)
-    const from  = now - 86400 // last 24h
-    const url   = `${BASE_URL}/defi/ohlcv?address=${mint}&type=${type}&time_from=${from}&time_to=${now}`
-    const r = await fetch(url, {
-      headers: {
-        'X-API-KEY': BIRDEYE_KEY,
-        'x-chain': 'solana',
-      },
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!r.ok) throw new Error(`Birdeye ${r.status}`)
-    const json = await r.json()
-    res.json(json)
-  } catch (err: any) {
-    res.status(502).json({ error: err.message })
-  }
-})
+    // 2. Konstruksi URL secara aman
+    const url = new URL(JUPITER_QUOTE_API);
+    url.searchParams.set("inputMint", String(inputMint));
+    url.searchParams.set("outputMint", String(outputMint));
+    url.searchParams.set("amount", String(amount));
+    url.searchParams.set("slippageBps", String(slippageBps));
 
+    // 3. Fetch dengan Timeout (Mencegah server gantung)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Neon-Stratos-Proxy",
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    // 4. Handling Error dari Jupiter/Cloudflare
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorJson;
+      try {
+        errorJson = JSON.parse(errorText);
+      } catch {
+        errorJson = errorText;
+      }
+
+      return res.status(response.status).json({
+        error: "Upstream Provider Error",
+        status: response.status,
+        details: errorJson,
+      });
+    }
+
+    const data = await response.json();
+    return res.json(data);
+  } catch (err: any) {
+    console.error(`[Proxy Error]: ${err.message}`);
+
+    if (err.name === "AbortError") {
+      return res
+        .status(504)
+        .json({ error: "Gateway Timeout: Jupiter took too long to respond" });
+    }
+
+    return res.status(502).json({
+      error: "Bad Gateway",
+      message: err.message,
+    });
+  }
+});
+
+// ===============================
+// SERVER START
+// ===============================
 app.listen(PORT, () => {
-  console.log(`[KASM Backend] Running on port ${PORT}`)
-  if (!BIRDEYE_KEY) {
-    console.warn('[KASM Backend] BIRDEYE_API_KEY not set — price data will use mocks')
-  }
-})
+  console.log("");
+  console.log(`\x1b[36m%s\x1b[0m`, `  ⚡ Neon Stratos Engine Initialized`);
+  console.log(
+    `\x1b[32m%s\x1b[0m`,
+    `  📡 Local Proxy : http://localhost:${PORT}`,
+  );
+  console.log(`\x1b[90m%s\x1b[0m`, `  🛠  Mode        : TypeScript (tsx)`);
+  console.log("");
+});

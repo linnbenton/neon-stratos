@@ -241,3 +241,45 @@ body {
 .scanline {
   animation: none !important;
 }
+
+@keyframes neonToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.neon-toast {
+  animation: neonToastIn 0.28s ease;
+}
+
+.ticker-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.ticker-marquee {
+  display: flex;
+  width: max-content;
+
+  animation: tickerScroll 28s linear infinite;
+}
+
+.ticker-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
