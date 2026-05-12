@@ -1,14 +1,54 @@
-import { Home, BarChart3, Layers, ArrowLeftRight, Wallet } from "lucide-react";
+import {
+  Home,
+  BarChart3,
+  Layers,
+  ArrowLeftRight,
+  Wallet,
+  Bot,
+} from "lucide-react";
+import { useAppStore } from "../state/appStore.jsx";
 
 const items = [
-  { label: "Dashboard", icon: Home },
-  { label: "Portfolio", icon: BarChart3 },
-  { label: "Swap", icon: ArrowLeftRight },
-  { label: "Vaults", icon: Layers },
-  { label: "Wallet", icon: Wallet },
+  {
+    label: "Dashboard",
+    tab: "dashboard",
+    icon: Home,
+  },
+
+  {
+    label: "Portfolio",
+    tab: "portfolio",
+    icon: BarChart3,
+  },
+
+  {
+    label: "Orderbook",
+    tab: "orderbook",
+    icon: ArrowLeftRight,
+  },
+
+  {
+    label: "Vaults",
+    tab: "vaults",
+    icon: Layers,
+  },
+
+  {
+    label: "Wallet",
+    tab: "wallet",
+    icon: Wallet,
+  },
+
+  {
+    label: "AI Agent",
+    tab: "agent",
+    icon: Bot,
+  },
 ];
 
 export default function Sidebar() {
+  const { activeTab, setActiveTab } = useAppStore();
+
   return (
     <aside
       className="
@@ -33,18 +73,23 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1 px-3 py-4">
-        {items.map(({ label, icon: Icon }) => (
+        {items.map(({ label, icon: Icon, tab }) => (
           <button
             key={label}
-            className="
-              flex items-center gap-3
-              px-3 py-2
-              rounded-lg
-              text-sm
-              text-slate-400
-              hover:bg-[#111827]
-              hover:text-[#00ffa3]
-            "
+            onClick={() => setActiveTab(tab)}
+            className={`
+    flex items-center gap-3
+    px-3 py-2
+    rounded-lg
+    text-sm
+    transition-all
+
+    ${
+      activeTab === tab
+        ? "bg-[#00ffa3] text-black"
+        : "text-slate-400 hover:bg-[#111827] hover:text-[#00ffa3]"
+    }
+  `}
           >
             <Icon size={18} />
 

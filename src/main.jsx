@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
+import { AppProvider } from "./state/appStore.jsx";
+import { MarketProvider } from "./state/marketStore.jsx";
 
 import { Buffer } from "buffer";
 window.Buffer = Buffer;
@@ -27,7 +29,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <ConnectionProvider endpoint={endpoint}>
     <WalletProvider wallets={wallets} autoConnect>
       <WalletModalProvider>
-        <App />
+        <AppProvider>
+          <MarketProvider>
+            <App />
+          </MarketProvider>
+        </AppProvider>
       </WalletModalProvider>
     </WalletProvider>
   </ConnectionProvider>,

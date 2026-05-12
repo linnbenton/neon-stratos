@@ -4,12 +4,20 @@ import MarketTable from "./modules/markets/MarketTable";
 import TickerBar from "./modules/markets/TickerBar";
 import StatsCard from "./components/ui/StatsCard";
 import WalletPanel from "./modules/wallet/WalletPanel";
+import { useAppStore } from "./state/appStore.jsx";
+
+import Dashboard from "./modules/dashboard/Dashboard";
+import Portfolio from "./modules/portfolio/Portfolio";
+import OrderBook from "./modules/trading/OrderBook";
+import Vaults from "./modules/vaults/Vaults";
+import AIAgent from "./modules/agent/AIAgent";
 
 const PriceChart = lazy(() => import("./modules/charts/PriceChart"));
 const SwapPanel = lazy(() => import("./modules/trading/SwapPanel"));
 const ActivityFeed = lazy(() => import("./modules/activity/ActivityFeed"));
 
 export default function App() {
+  const { activeTab } = useAppStore();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState([
     {
@@ -70,6 +78,66 @@ export default function App() {
     <Suspense fallback={<div className="text-white">Loading app...</div>}>
       <MainLayout search={search} setSearch={setSearch}>
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+          {/* CYAN CORE */}
+          <div
+            className="
+    absolute
+
+    top-[10%]
+    left-[15%]
+
+    w-[700px]
+    h-[700px]
+
+    bg-cyan-400/10
+
+    blur-[180px]
+
+    rounded-full
+  "
+          />
+
+          {/* ORANGE ENERGY */}
+          <div
+            className="
+    absolute
+
+    bottom-[-200px]
+    right-[-100px]
+
+    w-[600px]
+    h-[600px]
+
+    bg-orange-500/10
+
+    blur-[200px]
+
+    rounded-full
+  "
+          />
+
+          {/* CENTER GLOW */}
+          <div
+            className="
+    absolute
+
+    top-1/2
+    left-1/2
+
+    -translate-x-1/2
+    -translate-y-1/2
+
+    w-[900px]
+    h-[900px]
+
+    bg-emerald-400/5
+
+    blur-[220px]
+
+    rounded-full
+  "
+          />
+
           {/* Green ambient */}
           <div
             className="
@@ -131,82 +199,18 @@ export default function App() {
           />
         </div>
         <TickerBar tokens={tokens} />
-        <div className="space-y-6">
-          {/* Page Title */}
-          <div>
-            <h1 className="text-2xl font-bold text-[#00ffa3] drop-shadow-[0_0_12px_rgba(0,255,163,0.8)]">
-              Dashboard
-            </h1>
+        <div className="flex-1 overflow-auto">
+          {activeTab === "dashboard" && <Dashboard />}
 
-            <p className="text-sm text-slate-400 mt-1">
-              Live Solana DeFi overview
-            </p>
-          </div>
+          {activeTab === "portfolio" && <Portfolio />}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <StatsCard
-              title="Portfolio Value"
-              value="$24,892"
-              change="8.42%"
-              positive={true}
-            />
+          {activeTab === "orderbook" && <OrderBook />}
 
-            <StatsCard
-              title="Active Vaults"
-              value="12"
-              change="2 new"
-              positive={true}
-            />
+          {activeTab === "vaults" && <Vaults />}
 
-            <StatsCard
-              title="Daily PnL"
-              value="+$1,284"
-              change="-1.12%"
-              positive={false}
-            />
-          </div>
+          {activeTab === "wallet" && <WalletPanel />}
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <Suspense
-                fallback={
-                  <div className="text-slate-500 text-sm">Loading chart...</div>
-                }
-              >
-                <PriceChart />
-              </Suspense>{" "}
-            </div>
-
-            <WalletPanel />
-          </div>
-
-          {/* Market Table */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <MarketTable tokens={filteredTokens} />
-            </div>
-
-            <Suspense
-              fallback={
-                <div className="text-slate-500 text-sm">Loading module...</div>
-              }
-            >
-              <SwapPanel />
-            </Suspense>
-          </div>
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <Suspense
-                fallback={
-                  <div className="text-slate-500 text-sm">
-                    Loading activity...
-                  </div>
-                }
-              >
-                <ActivityFeed />
-              </Suspense>{" "}
-            </div>
-          </div>
+          {activeTab === "agent" && <AIAgent />}
         </div>
       </MainLayout>
     </Suspense>

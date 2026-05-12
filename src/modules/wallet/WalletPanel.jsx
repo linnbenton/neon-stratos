@@ -25,6 +25,24 @@ export default function WalletPanel() {
       {/* HEADER */}
       <div>
         <h2 className="text-white font-semibold text-lg">My Balance</h2>
+        <div className="mt-3">
+          <div className="text-xs text-slate-500">TOTAL ASSETS</div>
+
+          <div
+            className="
+      text-3xl
+      font-bold
+      text-white
+      mt-1
+
+      drop-shadow-[0_0_20px_rgba(0,255,163,0.2)]
+    "
+          >
+            $24,892.42
+          </div>
+
+          <div className="text-[#00ffa3] text-sm mt-1">+8.42% today</div>
+        </div>
         <p className="text-slate-500 text-xs">Solana mainnet connection</p>
       </div>
 

@@ -5,26 +5,46 @@ const WebSocketServer = WebSocket.WebSocketServer;
 
 export function startMarketStream() {
   const PORT = 8080;
-  const SYMBOL = "SOL/USDC";
 
-  const wss = new WebSocketServer({ port: PORT });
+  const wss = new WebSocketServer({
+    port: PORT,
+  });
 
-  console.log(`WS Market Stream running on :${PORT}`);
+  console.log(`WS Market Stream :${PORT}`);
 
-  // ===============================
-  // MARKET LOOP (ORDERBOOK STREAM)
-  // ===============================
-  const interval = setInterval(() => {
-    const midPrice = 100 + Math.random() * 2;
+  let currentPrice = 145;
 
-    const orderbook = generateOrderbook(midPrice);
+  setInterval(() => {
+    // SMALL REALISTIC MOVEMENT
+    const move = (Math.random() - 0.5) * 0.8;
+
+    currentPrice += move;
+
+    const orderbook = generateOrderbook(currentPrice);
 
     const payload = {
-      type: "orderbook",
-      symbol: SYMBOL,
-      midPrice,
-      bids: orderbook.bids,
-      asks: orderbook.asks,
+      type: "market",
+
+      symbol: "SOL/USDC",
+
+      price: Number(currentPrice.toFixed(2)),
+
+      change: Number((move * 2).toFixed(2)),
+
+      volume: Math.floor(1000000 + Math.random() * 500000),
+
+      orderbook,
+
+      trades: Array.from({ length: 8 }, (_, i) => ({
+        side: Math.random() > 0.5 ? "buy" : "sell",
+
+        price: Number((currentPrice + (Math.random() - 0.5)).toFixed(2)),
+
+        size: Number((Math.random() * 5).toFixed(3)),
+
+        ts: Date.now() - i * 1000,
+      })),
+
       ts: Date.now(),
     };
 
@@ -33,25 +53,16 @@ export function startMarketStream() {
         client.send(JSON.stringify(payload));
       }
     });
-  }, 1000);
+  }, 1200);
 
-  // ===============================
-  // CONNECTION EVENT
-  // ===============================
   wss.on("connection", (ws) => {
+    console.log("client connected");
+
     ws.send(
       JSON.stringify({
         type: "welcome",
-        message: "connected to CEX market stream v3",
-        symbol: SYMBOL,
+        message: "connected to Neon market stream",
       }),
     );
-  });
-
-  // ===============================
-  // CLEAN SHUTDOWN
-  // ===============================
-  wss.on("close", () => {
-    clearInterval(interval);
   });
 }
