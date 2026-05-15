@@ -8,7 +8,7 @@ import GlassPanel from "../../components/ui/GlassPanel";
 
 import LiveChart from "./LiveChart";
 
-export default function Dashboard() {
+export default function Dashboard({ agentState, intelState }) {
   const { price, connected } = useMarketStream();
 
   return (
@@ -60,6 +60,78 @@ export default function Dashboard() {
       <LiveMarketPanel />
 
       <LiveChart />
+
+      {/* AI INTELLIGENCE GRID */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        {/* SIGNAL */}
+        <GlassPanel className="p-5">
+          <div className="text-xs tracking-[0.2em] uppercase text-cyan-400/70">
+            AI SIGNAL
+          </div>
+
+          <div className="mt-3 text-3xl font-bold text-white">
+            {intelState?.signal || "WAIT"}
+          </div>
+
+          <div className="mt-2 text-sm text-slate-400">
+            {intelState?.message || "Analyzing market conditions"}
+          </div>
+        </GlassPanel>
+
+        {/* REGIME */}
+        <GlassPanel className="p-5">
+          <div className="text-xs tracking-[0.2em] uppercase text-slate-500">
+            MARKET REGIME
+          </div>
+
+          <div className="mt-3 text-2xl font-semibold text-white">
+            {intelState?.regime || "RANGE"}
+          </div>
+
+          <div className="mt-2 text-sm text-slate-500">
+            Adaptive volatility detection
+          </div>
+        </GlassPanel>
+
+        {/* CONFIDENCE */}
+        <GlassPanel className="p-5">
+          <div className="text-xs tracking-[0.2em] uppercase text-emerald-300/70">
+            CONFIDENCE
+          </div>
+
+          <div className="mt-3 text-3xl font-bold text-emerald-400">
+            {Math.round((intelState?.confidence || 0) * 100)}%
+          </div>
+
+          <div className="mt-2 text-sm text-slate-500">
+            Institutional AI conviction
+          </div>
+        </GlassPanel>
+      </div>
+
+      {/* AGENT PANEL */}
+      <GlassPanel className="p-5">
+        <div className="text-xs tracking-[0.2em] uppercase text-slate-500">
+          AGENT DECISION ENGINE
+        </div>
+
+        <div className="mt-3 text-2xl font-semibold text-white">
+          {agentState?.signal || "NEUTRAL"}
+        </div>
+
+        <div className="mt-2 text-sm text-slate-400">
+          {agentState?.message || "Awaiting signal generation"}
+        </div>
+
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/5">
+          <div
+            className="h-full rounded-full bg-cyan-400 transition-all duration-500"
+            style={{
+              width: `${Math.round((agentState?.confidence || 0) * 100)}%`,
+            }}
+          />
+        </div>
+      </GlassPanel>
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

@@ -1,22 +1,36 @@
-import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import MainLayout from "./layout/MainLayout";
 import MarketTable from "./modules/markets/MarketTable";
 import TickerBar from "./modules/markets/TickerBar";
 import StatsCard from "./components/ui/StatsCard";
 import WalletPanel from "./modules/wallet/WalletPanel";
 import { useAppStore } from "./state/appStore.jsx";
+import { createMarketEngine } from "./lib/marketEngine";
+import { createAIMarketEngine } from "./lib/aiMarketEngine";
+import { MarketAgent } from "./modules/agent/MarketAgent";
 
 import Dashboard from "./modules/dashboard/Dashboard";
 import Portfolio from "./modules/portfolio/Portfolio";
 import OrderBook from "./modules/trading/OrderBook";
 import Vaults from "./modules/vaults/Vaults";
 import AIAgent from "./modules/agent/AIAgent";
+import CinematicBackground from "./components/ui/CinematicBackground";
+import SentimentPulse from "./components/ui/SentimentPulse";
+import { IntelligenceCore } from "./modules/agent/IntelligenceCore";
 
 const PriceChart = lazy(() => import("./modules/charts/PriceChart"));
 const SwapPanel = lazy(() => import("./modules/trading/SwapPanel"));
 const ActivityFeed = lazy(() => import("./modules/activity/ActivityFeed"));
 
 export default function App() {
+  // 1. hooks state
   const { activeTab } = useAppStore();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState([
@@ -43,15 +57,68 @@ export default function App() {
     },
   ]);
 
+  const [livePrice, setLivePrice] = useState(178);
+  const agentRef = useRef(null);
+  const [agentState, setAgentState] = useState(null);
+  const [intelState, setIntelState] = useState(null);
+
+  // ⭐ AI STATE
+  const [aiInsights, setAiInsights] = useState([]);
+
+  // =========================
+  // 2. AI MARKET ENGINE
+  // =========================
+  useEffect(() => {
+    const ai = createAIMarketEngine();
+
+    const unsub = ai.subscribe((data) => {
+      setAiInsights((prev) => {
+        const next = [data, ...prev];
+        return next.slice(0, 5);
+      });
+    });
+
+    const interval = setInterval(() => {
+      ai.push(livePrice, (Math.random() - 0.5) * 0.8);
+    }, 2500);
+
+    return () => {
+      unsub();
+      clearInterval(interval);
+    };
+  }, [livePrice]);
+
+  // =========================
+  // 3. MARKET AGENT CORE
+  // =========================
+  useEffect(() => {
+    const agent = new MarketAgent();
+    agentRef.current = agent;
+
+    const unsub = agent.subscribe((state) => {
+      setAgentState(state);
+    });
+
+    const interval = setInterval(() => {
+      agent.step({ price: livePrice });
+    }, 1500);
+
+    return () => {
+      unsub();
+      clearInterval(interval);
+    };
+  }, [livePrice]);
+
+  // =========================
+  // 4. TOKEN SIMULATION
+  // =========================
   useEffect(() => {
     const interval = setInterval(() => {
       setTokens((prevTokens) =>
         prevTokens.map((token, index) => {
           const target = Math.floor(Math.random() * prevTokens.length);
 
-          if (index !== target) {
-            return token;
-          }
+          if (index !== target) return token;
 
           const randomMove = (Math.random() - 0.5) * 0.15;
 
@@ -68,6 +135,41 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // =========================
+  // 5. MARKET ENGINE (PRICE FEED)
+  // =========================
+  useEffect(() => {
+    const engine = createMarketEngine(178);
+
+    const unsub = engine.subscribe((state) => {
+      setLivePrice(state.price);
+    });
+
+    engine.start(1500);
+
+    return () => {
+      unsub();
+      engine.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    const intel = new IntelligenceCore();
+
+    const unsub = intel.subscribe((state) => {
+      setIntelState({ ...state });
+    });
+
+    const interval = setInterval(() => {
+      intel.update(livePrice);
+    }, 1200);
+
+    return () => {
+      unsub();
+      clearInterval(interval);
+    };
+  }, [livePrice]);
+
   const filteredTokens = tokens.filter(
     (token) =>
       token.symbol.toLowerCase().includes(search.toLowerCase()) ||
@@ -76,6 +178,8 @@ export default function App() {
 
   return (
     <Suspense fallback={<div className="text-white">Loading app...</div>}>
+      <CinematicBackground />
+
       <MainLayout search={search} setSearch={setSearch}>
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           {/* CYAN CORE */}
@@ -200,7 +304,9 @@ export default function App() {
         </div>
         <TickerBar tokens={tokens} />
         <div className="flex-1 overflow-auto">
-          {activeTab === "dashboard" && <Dashboard />}
+          {activeTab === "dashboard" && (
+            <Dashboard agentState={agentState} intelState={intelState} />
+          )}
 
           {activeTab === "portfolio" && <Portfolio />}
 
@@ -213,6 +319,7 @@ export default function App() {
           {activeTab === "agent" && <AIAgent />}
         </div>
       </MainLayout>
+      <SentimentPulse />
     </Suspense>
   );
 }

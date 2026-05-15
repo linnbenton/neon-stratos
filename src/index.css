@@ -459,3 +459,50 @@ body::before {
 .cyber-value {
   text-shadow: 0 0 20px rgba(0, 255, 170, 0.25);
 }
+
+/* =========================================
+   NEON STRATOS — CINEMATIC FX SYSTEM
+========================================= */
+
+.noise-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='white' fill-opacity='0.03'%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='80' cy='40' r='1'/%3E%3Ccircle cx='120' cy='100' r='1'/%3E%3Ccircle cx='40' cy='120' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.aurora {
+  position: fixed;
+  width: 50vw;
+  height: 50vw;
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: -5;
+  animation: auroraFloat 18s ease-in-out infinite;
+}
+
+.aurora-1 {
+  top: -10%;
+  left: -10%;
+  background: #00fff2;
+}
+
+.aurora-2 {
+  bottom: -20%;
+  right: -10%;
+  background: #0066ff;
+  animation-delay: -8s;
+}
+
+@keyframes auroraFloat {
+  0% {
+    transform: translate(0px, 0px);
+  }
+
+  50% {
+    transform: translate(30px, 40px);
+  }
+
+  100% {
+    transform: translate(0px, 0px);
+  }
+}

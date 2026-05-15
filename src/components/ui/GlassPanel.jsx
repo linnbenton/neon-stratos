@@ -1,93 +1,100 @@
-export default function GlassPanel({ children, className = "" }) {
+export default function GlassPanel({ children, className = "", glow = true }) {
   return (
     <div
       className={`
-  group
+        group
+        relative
+        overflow-hidden
 
-  relative
+        rounded-3xl
 
-  overflow-hidden
+        border border-white/10
 
-  rounded-3xl
+        bg-white/[0.04]
 
-  border
-  border-cyan-400/10
+        backdrop-blur-2xl
 
-  bg-[#050816]/72
+        shadow-[0_8px_40px_rgba(0,0,0,0.45)]
 
-  backdrop-blur-2xl
+        transition-all
+        duration-500
 
-  shadow-[0_0_80px_rgba(0,255,170,0.05)]
+        hover:border-cyan-400/20
+        hover:shadow-[0_0_60px_rgba(0,255,255,0.08)]
 
-  transition-all
-  duration-300
-
-  hover:border-cyan-400/20
-
-  hover:shadow-[0_0_120px_rgba(0,255,170,0.10)]
-
-  before:absolute
-  before:inset-0
-
-  before:bg-[radial-gradient(circle_at_top_left,rgba(0,255,170,0.12),transparent_35%)]
-
-  before:opacity-80
-
-  after:absolute
-  after:inset-0
-
-  after:bg-[linear-gradient(to_bottom,transparent,rgba(255,255,255,0.02))]
-
-  ${className}
-`}
+        ${className}
+      `}
     >
-      {/* glow */}
-      <div
-        className="
-          absolute
-          inset-0
-
-          bg-gradient-to-br
-          from-cyan-400/5
-          via-transparent
-          to-emerald-400/5
-
-          pointer-events-none
-        "
-      />
-
-      {/* top highlight */}
+      {/* TOP LIGHT EDGE */}
       <div
         className="
           absolute
           top-0
           left-0
-          right-0
-
           h-px
+          w-full
 
           bg-gradient-to-r
           from-transparent
-          via-cyan-400/40
+          via-cyan-300/80
           to-transparent
+
+          opacity-80
         "
       />
 
-      {/* inner border */}
+      {/* INNER LIGHT */}
       <div
         className="
           absolute
-          inset-[1px]
+          inset-0
 
-          rounded-2xl
-
-          border
-          border-white/[0.03]
+          bg-[linear-gradient(to_bottom_right,rgba(255,255,255,0.08),transparent_35%)]
 
           pointer-events-none
         "
       />
 
+      {/* CORNER GLOW */}
+      {glow && (
+        <div
+          className="
+            absolute
+            -top-24
+            -right-24
+
+            w-48
+            h-48
+
+            bg-cyan-400/10
+
+            blur-3xl
+            rounded-full
+
+            opacity-0
+            group-hover:opacity-100
+
+            transition-all
+            duration-700
+          "
+        />
+      )}
+
+      {/* DEPTH BORDER */}
+      <div
+        className="
+          absolute
+          inset-[1px]
+
+          rounded-3xl
+
+          border border-white/[0.04]
+
+          pointer-events-none
+        "
+      />
+
+      {/* CONTENT */}
       <div className="relative z-10">{children}</div>
     </div>
   );

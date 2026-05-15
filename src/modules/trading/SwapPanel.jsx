@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Buffer } from "buffer";
 import { Connection, VersionedTransaction } from "@solana/web3.js";
+import { connection } from "../../lib/solana";
 
-import { getQuote } from "../../lib/jupiter";
+import { getQuote, createSwapTransaction } from "../../lib/jupiter";
 
 export default function SwapPanel() {
   const [amount, setAmount] = useState("");
@@ -15,8 +16,6 @@ export default function SwapPanel() {
   const { publicKey, signTransaction } = useWallet();
 
   const valid = !!quote && !!publicKey;
-
-  const abortRef = useRef(null);
 
   // ===============================
   // CONFIG & MAPPING
@@ -58,6 +57,8 @@ export default function SwapPanel() {
 
         // 3. Update State jika data valid
         setQuote(data || null);
+
+        setPriceImpact(Number(data?.priceImpactPct || 0) * 100);
       } catch (err) {
         // Abaikan error jika itu disebabkan oleh pembatalan request (Abort)
         if (err.name !== "AbortError") {
@@ -95,38 +96,76 @@ export default function SwapPanel() {
   // HANDLE SWAP EXECUTION
   // ===============================
   const handleSwap = async () => {
-    if (!publicKey || !quote) return;
+    // Tambahkan pengecekan signTransaction
+    if (!publicKey || !quote || !signTransaction) {
+      console.error("Wallet tidak siap atau tidak mendukung signTransaction");
+      alert("Hubungkan wallet Solana (Phantom/Solflare) terlebih dahulu!");
+      return;
+    }
 
     try {
-      setToast(true);
+      setLoading(true);
 
-      // 1. Request swap transaction
-      const swapData = await getSwapTransaction(quote, publicKey.toBase58());
+      // Pastikan kita menggunakan Buffer versi terbaru untuk Mainnet
+      const swapData = await createSwapTransaction({
+        quoteResponse: quote,
+        userPublicKey: publicKey.toBase58(),
+        wrapAndUnwrapSol: true,
+        prioritizationFeeLamports: 50000, // Wajib di Mainnet agar tidak macet
+      });
 
-      // 2. Decode transaction
+      // 2. Deserialize Transaction
       const swapTransactionBuf = Buffer.from(
         swapData.swapTransaction,
         "base64",
       );
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
-      // 3. Sign transaction
+      // 3. Ambil Blockhash Terbaru (PENTING untuk Mainnet)
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash("confirmed");
+      transaction.message.recentBlockhash = blockhash;
+
+      // 4. Sign Transaction via Wallet
       const signedTx = await signTransaction(transaction);
 
-      // 4. Send transaction
-      const connection = new Connection("https://rpc.ankr.com/solana");
+      // 5. Kirim Transaksi dengan konfigurasi khusus Mainnet
       const signature = await connection.sendRawTransaction(
         signedTx.serialize(),
         {
-          skipPreflight: true,
-          maxRetries: 2,
+          skipPreflight: false, // Biarkan sistem mengecek simulasi dulu
+          preflightCommitment: "confirmed",
+          maxRetries: 3, // Coba lagi otomatis jika gagal di awal
         },
       );
 
-      await connection.confirmTransaction(signature, "confirmed");
+      setToast(true);
+      console.log("Transaction Sent:", signature);
+
+      // 6. Konfirmasi Transaksi
+      const confirmation = await connection.confirmTransaction(
+        {
+          signature,
+          blockhash,
+          lastValidBlockHeight,
+        },
+        "confirmed",
+      );
+
+      if (confirmation.value.err) {
+        throw new Error("Transaction confirmed but failed on-chain");
+      }
+
       console.log("SWAP SUCCESS:", signature);
+      setTimeout(() => setToast(false), 5000); // Tutup toast setelah 5 detik
     } catch (err) {
-      console.error("Swap failed:", err);
+      // Ini akan memunculkan pesan error asli dari Solana/Jupiter di console
+      console.error("--- SWAP ERROR DETAIL ---");
+      console.error("Message:", err.message);
+      if (err.logs) {
+        console.error("Logs dari Blockchain:", err.logs);
+      }
+      alert(`Eksekusi Gagal: ${err.message}`);
     }
   };
 
@@ -219,7 +258,7 @@ export default function SwapPanel() {
       {/* BUTTON */}
       <button
         onClick={handleSwap}
-        disabled={!valid}
+        disabled={!valid || loading}
         className={`
           w-full py-3 rounded-xl font-medium transition
           ${
@@ -229,7 +268,7 @@ export default function SwapPanel() {
           }
         `}
       >
-        {loading ? "Detecting Route..." : "Instant Swap"}
+        {loading ? "Executing..." : "Instant Swap"}
       </button>
 
       {/* TOAST */}

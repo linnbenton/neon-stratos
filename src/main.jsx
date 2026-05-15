@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
+
 import { AppProvider } from "./state/appStore.jsx";
 import { MarketProvider } from "./state/marketStore.jsx";
 
@@ -14,7 +15,7 @@ import {
 } from "@solana/wallet-adapter-react";
 
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -23,7 +24,7 @@ const network = WalletAdapterNetwork.Mainnet;
 
 const endpoint = "https://rpc.ankr.com/solana";
 
-const wallets = [new PhantomWalletAdapter({ network })];
+const wallets = [];
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ConnectionProvider endpoint={endpoint}>

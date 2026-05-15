@@ -14,15 +14,17 @@
   },
   "dependencies": {
     "@jup-ag/api": "^6.0.48",
+    "@solana/spl-token": "^0.4.14",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",
     "@solana/wallet-adapter-wallets": "^0.19.38",
     "@solana/web3.js": "^1.98.4",
-    "axios": "^1.16.0",
+    "@solflare-wallet/sdk": "^1.4.2",
     "buffer": "^6.0.3",
     "clsx": "^2.1.0",
     "cors": "^2.8.6",
     "date-fns": "^3.3.1",
+    "dotenv": "^17.4.2",
     "express": "^4.22.1",
     "framer-motion": "^11.0.8",
     "lightweight-charts": "^4.2.0",
@@ -32,7 +34,9 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "recharts": "^2.10.3",
-    "ws": "^8.20.0"
+    "vite-plugin-node-polyfills": "^0.26.0",
+    "ws": "^8.20.0",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

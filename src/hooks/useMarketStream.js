@@ -1,38 +1,55 @@
 import { useEffect, useState } from "react";
 
 export default function useMarketStream() {
-  const [price, setPrice] = useState(145);
+  const [price, setPrice] = useState(178);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080");
+    let ws;
 
-    ws.onopen = () => {
-      console.log("WS connected");
-      setConnected(true);
-    };
+    try {
+      ws = new WebSocket("ws://localhost:8080");
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
+      ws.onopen = () => {
+        setConnected(true);
+      };
 
-        if (data.price) {
-          setPrice(data.price);
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+
+          if (data?.price) {
+            setPrice(data.price);
+          }
+        } catch (err) {
+          console.error("WS parse error:", err);
         }
-      } catch (err) {
-        console.error("WS parse error", err);
-      }
-    };
+      };
 
-    ws.onerror = () => {
-      setConnected(false);
-    };
+      ws.onclose = () => {
+        setConnected(false);
+      };
 
-    ws.onclose = () => {
-      setConnected(false);
-    };
+      ws.onerror = () => {
+        setConnected(false);
+      };
+    } catch (err) {
+      console.error(err);
+    }
 
-    return () => ws.close();
+    // FALLBACK ENGINE
+    const interval = setInterval(() => {
+      setPrice((prev) => {
+        const move = (Math.random() - 0.5) * 1.5;
+
+        return Number((prev + move).toFixed(2));
+      });
+    }, 1500);
+
+    return () => {
+      ws?.close();
+      clearInterval(interval);
+    };
   }, []);
 
   return {

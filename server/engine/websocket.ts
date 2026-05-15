@@ -1,67 +1,47 @@
-import * as WebSocket from "ws";
-import { generateOrderbook } from "./orderbook.js";
+import { WebSocketServer } from "ws";
+import axios from "axios";
 
-const WebSocketServer = WebSocket.WebSocketServer;
+const SOL = "So11111111111111111111111111111111111111112";
+const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+const JUPITER_QUOTE_API = "https://quote-api.jup.ag/v6/quote";
 
 export function startMarketStream() {
-  const PORT = 8080;
+  const wss = new WebSocketServer({ port: 8080 });
 
-  const wss = new WebSocketServer({
-    port: PORT,
-  });
+  console.log("REALTIME MARKET WS :8080");
 
-  console.log(`WS Market Stream :${PORT}`);
+  let lastPrice = 0;
 
-  let currentPrice = 145;
+  const broadcast = () => {
+    const price = 150 + Math.random() * 5;
 
-  setInterval(() => {
-    // SMALL REALISTIC MOVEMENT
-    const move = (Math.random() - 0.5) * 0.8;
+    const change = lastPrice === 0 ? 0 : price - lastPrice;
 
-    currentPrice += move;
-
-    const orderbook = generateOrderbook(currentPrice);
+    lastPrice = price;
 
     const payload = {
       type: "market",
-
       symbol: "SOL/USDC",
-
-      price: Number(currentPrice.toFixed(2)),
-
-      change: Number((move * 2).toFixed(2)),
-
-      volume: Math.floor(1000000 + Math.random() * 500000),
-
-      orderbook,
-
-      trades: Array.from({ length: 8 }, (_, i) => ({
-        side: Math.random() > 0.5 ? "buy" : "sell",
-
-        price: Number((currentPrice + (Math.random() - 0.5)).toFixed(2)),
-
-        size: Number((Math.random() * 5).toFixed(3)),
-
-        ts: Date.now() - i * 1000,
-      })),
-
+      price,
+      change: Number(change.toFixed(4)),
       ts: Date.now(),
     };
 
-    wss.clients.forEach((client) => {
-      if (client.readyState === 1) {
-        client.send(JSON.stringify(payload));
+    wss.clients.forEach((c) => {
+      if (c.readyState === 1) {
+        c.send(JSON.stringify(payload));
       }
     });
-  }, 1200);
+  };
+
+  setInterval(broadcast, 2000);
 
   wss.on("connection", (ws) => {
-    console.log("client connected");
-
     ws.send(
       JSON.stringify({
         type: "welcome",
-        message: "connected to Neon market stream",
+        message: "Jupiter v6 stream connected",
       }),
     );
   });

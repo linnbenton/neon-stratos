@@ -1,12 +1,42 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Copy, Check, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Check, Copy, LogOut } from "lucide-react";
+
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { connection } from "../../lib/solana";
+
+import { useEffect, useState } from "react";
 
 export default function WalletPanel() {
   const { publicKey, disconnect } = useWallet();
   const [copied, setCopied] = useState(false);
 
+  const [solBalance, setSolBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
+
   const address = publicKey?.toBase58();
+
+  useEffect(() => {
+    if (!publicKey) {
+      setSolBalance(0);
+      return;
+    }
+
+    const loadBalance = async () => {
+      try {
+        setLoading(true);
+
+        const lamports = await connection.getBalance(publicKey);
+
+        setSolBalance(lamports / LAMPORTS_PER_SOL);
+      } catch (err) {
+        console.error("wallet balance error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBalance();
+  }, [publicKey]);
 
   const handleCopy = async () => {
     try {
@@ -30,18 +60,20 @@ export default function WalletPanel() {
 
           <div
             className="
-      text-3xl
-      font-bold
-      text-white
-      mt-1
+    text-3xl
+    font-bold
+    text-white
+    mt-1
 
-      drop-shadow-[0_0_20px_rgba(0,255,163,0.2)]
-    "
+    drop-shadow-[0_0_20px_rgba(0,255,163,0.2)]
+  "
           >
-            $24,892.42
+            {loading ? "Loading..." : `${solBalance.toFixed(4)} SOL`}
           </div>
 
-          <div className="text-[#00ffa3] text-sm mt-1">+8.42% today</div>
+          <div className="text-[#00ffa3] text-sm mt-1">
+            Mainnet wallet detected
+          </div>
         </div>
         <p className="text-slate-500 text-xs">Solana mainnet connection</p>
       </div>
@@ -91,12 +123,16 @@ export default function WalletPanel() {
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#05060a] border border-[#1a2332] rounded-xl p-3">
           <div className="text-xs text-slate-500">Balance</div>
-          <div className="text-white font-semibold mt-1">-- SOL</div>
+          <div className="text-white font-semibold mt-1">
+            {loading ? "..." : `${solBalance.toFixed(4)} SOL`}
+          </div>
         </div>
 
         <div className="bg-[#05060a] border border-[#1a2332] rounded-xl p-3">
           <div className="text-xs text-slate-500">Portfolio</div>
-          <div className="text-[#00ffa3] font-semibold mt-1">-- USD</div>
+          <div className="text-[#00ffa3] font-semibold mt-1">
+            {loading ? "..." : `${solBalance.toFixed(2)} DEVNET`}
+          </div>
         </div>
       </div>
     </div>
