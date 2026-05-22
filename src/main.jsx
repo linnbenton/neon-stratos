@@ -24,9 +24,10 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 
 const network = WalletAdapterNetwork.Mainnet;
 
-const endpoint = import.meta.env.VITE_RPC_URL;
+const endpoint =
+  import.meta.env.VITE_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
 
-const wallets = [new PhantomWalletAdapter()];
+const wallets = [];
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ConnectionProvider endpoint={endpoint}>
