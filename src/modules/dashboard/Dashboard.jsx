@@ -1,3 +1,4 @@
+import { useState } from "react";
 import useMarketStream from "../../hooks/useMarketStream";
 
 import LiveMarketPanel from "./LiveMarketPanel";
@@ -10,6 +11,8 @@ import LiveChart from "./LiveChart";
 
 export default function Dashboard({ agentState, intelState }) {
   const { price, connected } = useMarketStream();
+
+  const [globalTx, setGlobalTx] = useState(null);
 
   return (
     <div className="space-y-6">
@@ -163,8 +166,19 @@ export default function Dashboard({ agentState, intelState }) {
           <div className="text-slate-500 text-sm">ENGINE</div>
 
           <div className="text-2xl font-semibold text-cyan-400 mt-3">
-            OFFLINE CEX
+            {globalTx ? "JUPITER LIVE" : "READY"}
           </div>
+
+          {globalTx && (
+            <a
+              href={`https://solscan.io/tx/${globalTx}`}
+              target="_blank"
+              rel="noreferrer"
+              className="block mt-3 text-sm text-emerald-400 hover:underline break-all"
+            >
+              View Proof Transaction
+            </a>
+          )}
         </GlassPanel>
       </div>
 
@@ -261,7 +275,7 @@ export default function Dashboard({ agentState, intelState }) {
 
         {/* RIGHT */}
         <div className="col-span-12 xl:col-span-4">
-          <SwapPanel />
+          <SwapPanel globalTx={globalTx} setGlobalTx={setGlobalTx} />
         </div>
       </div>
     </div>

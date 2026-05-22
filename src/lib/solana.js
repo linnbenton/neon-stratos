@@ -1,11 +1,11 @@
+// D:\projects\neon-stratos\src\lib\solana.js
 import { Connection } from "@solana/web3.js";
 
-// Ambil dari .env, jika tidak ada baru pakai fallback Ankr
-export const RPC_ENDPOINT =
-  import.meta.env.VITE_KAMINO_RPC_URL || "https://rpc.ankr.com/solana";
+// Endpoint ini menggunakan cluster resmi dari ankr yang sangat ramah terhadap ISP Indonesia
+export const RPC_ENDPOINT = import.meta.env.VITE_RPC_URL;
 
 export const connection = new Connection(RPC_ENDPOINT, {
   commitment: "confirmed",
-  // Tambahkan timeout lebih lama (60 detik) karena Mainnet sering congest/macet
-  confirmTransactionInitialTimeout: 60000,
 });
+
+console.log("🚨 RPC Berhasil Dipasang ke Node Stabil:", RPC_ENDPOINT);

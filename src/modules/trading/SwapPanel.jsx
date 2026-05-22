@@ -49,7 +49,7 @@ export default function SwapPanel() {
 
         const data = await getQuote({
           inputMint: "So11111111111111111111111111111111111111112", // SOL
-          outputMint: "EPjFWdd5AufqSSqeM2q9H2wzq1y4nP3Q6F4w8sYwK7t", // USDC
+          outputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
           amount: baseAmount,
           // Teruskan signal abort ke fungsi getQuote jika didukung (opsional)
           signal: controller.signal,

@@ -12,16 +12,22 @@ export default function Topbar({ search, setSearch }) {
         return;
       }
 
-      // 🔥 INI PENTING: pilih wallet dulu
       const phantom = wallets.find((w) => w.adapter.name === "Phantom");
 
       if (!phantom) {
-        alert("Phantom not found");
+        alert("Phantom wallet not installed");
         return;
       }
 
-      await select(phantom.adapter.name);
-      await connect();
+      select(phantom.adapter.name);
+
+      setTimeout(async () => {
+        try {
+          await connect();
+        } catch (err) {
+          console.error(err);
+        }
+      }, 500);
     } catch (e) {
       console.error("Wallet error:", e);
     }

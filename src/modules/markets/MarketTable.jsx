@@ -45,9 +45,11 @@ export default function MarketTable({ tokens = [] }) {
                   {/* Token */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#111827] border border-[#1a2332] flex items-center justify-center text-xs font-bold">
-                        {token.symbol?.slice(0, 2)}
-                      </div>
+                      <img
+                        src={token.logo}
+                        alt={token.symbol}
+                        className="w-8 h-8 rounded-full"
+                      />
 
                       <div>
                         <div className="font-medium text-slate-200">

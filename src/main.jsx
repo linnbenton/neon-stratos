@@ -18,13 +18,15 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 const network = WalletAdapterNetwork.Mainnet;
 
-const endpoint = "https://rpc.ankr.com/solana";
+const endpoint = import.meta.env.VITE_RPC_URL;
 
-const wallets = [];
+const wallets = [new PhantomWalletAdapter()];
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ConnectionProvider endpoint={endpoint}>
